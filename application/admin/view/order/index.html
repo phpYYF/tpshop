@@ -1,0 +1,151 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>无标题文档</title>
+    <link href="{:config('admin_static')}/css/style.css" rel="stylesheet" type="text/css" />
+    <link href="{:config('admin_static')}/css/page.css" rel="stylesheet" type="text/css" />
+    <script type="text/javascript" src="{:config('admin_static')}/js/jquery.js"></script>
+    <script type="text/javascript" src="/plugin/layer/layer.js"></script>
+    <script type="text/javascript">
+    $(document).ready(function() {
+        $(".click").click(function() {
+            $(".tip").fadeIn(200);
+        });
+
+        $(".tiptop a").click(function() {
+            $(".tip").fadeOut(200);
+        });
+
+        $(".sure").click(function() {
+            $(".tip").fadeOut(100);
+        });
+
+        $(".cancel").click(function() {
+            $(".tip").fadeOut(100);
+        });
+
+    });
+    </script>
+</head>
+
+<body>
+    <div class="place">
+        <span>位置：</span>
+        <ul class="placeul">
+            <li><a href="#">首页</a></li>
+            <li><a href="#">订单管理</a></li>
+            <li><a href="#">订单列表</a></li>
+        </ul>
+    </div>
+    <div class="rightinfo">
+        <div class="tools">
+            <ul>
+                <li>
+                 <label>输入收货人 | 电话 | 订单号 | 地址:</label>
+                <input type="text" placeholder="搜索 请输入收货人 | 电话 | 订单号 | 地址" name="keyword" class="dfinput" >
+                <input type="button" id="search" class="dfinput" style="width: 100px" value='查询'>
+                </li> 
+            </ul>
+        </div>
+        <table class="tablelist">
+            <thead>
+                <tr>
+                    <th>
+                        <input name="" type="checkbox" value="" id="checkAll" />
+                    </th>
+                    <th>订单号</th>
+                    <th>购买用户</th>
+                    <th>收货人/收获地址</th>
+                    <th>电话/邮编</th>
+                    <th>订单金额</th>
+                    <th>付款状态</th>
+                    <th>发货状态</th>
+                    <th>操作</th>
+                </tr>
+            </thead>
+            <tbody>
+               {include file='order/tbody' /}
+            </tbody>
+        </table>
+        <div class="pagination">
+           {$lists->render()}
+        </div>
+        <div class="tip">
+            <div class="tiptop"><span>提示信息</span>
+                <a></a>
+            </div>
+            <div class="tipinfo">
+                <span><img src="{:config('admin_static')}/images/ticon.png" /></span>
+                <div class="tipright">
+                    <p>是否确认对信息的修改 ？</p>
+                    <cite>如果是请点击确定按钮 ，否则请点取消。</cite>
+                </div>
+            </div>
+            <div class="tipbtn">
+                <input name="" type="button" class="sure" value="确定" />&nbsp;
+                <input name="" type="button" class="cancel" value="取消" />
+            </div>
+        </div>
+    </div>
+    <script type="text/javascript">
+        //ajax无刷新分页  使用委托绑定单击事件  ,让后来的元素页有单击事件
+        $(".pagination").on('click','a',function(){
+            var href = $(this).attr('href');
+            //阻止a标签的默认行为 return 禁止跳转
+            //点击分页页要带参数过去
+            var keyword = $("input[name='keyword']").val();
+            $.get(href,{"keyword":keyword},function(json){
+                // console.log(json);
+                var reg = new RegExp(keyword,'g');
+                if(keyword){
+                    $('tbody').html(json.tbody.replace(reg,"<span style='color:red'>"+keyword+"</span>"));
+                }else{
+                    $('tbody').html(json.tbody);
+                }
+                $('.pagination').html(json.pagelist);
+            },'json');
+            return false;
+        });
+        //ajax查看物流弹出层  核心知识点给查看物流绑定委托单击事件让新增的元素也有特效
+        $("tbody").on('click','.queryWuliu',function(){
+            var company = $(this).attr('company');
+            var number = $(this).attr('number');
+            $.get("{:url('admin/order/queryWuliu')}",{"company":company,"number":number},function(text){
+               //iframe层
+                layer.open({
+                  type: 2,
+                  title: 'layer mobile页',
+                  shadeClose: true,
+                  shade: 0.8,
+                  area: ['550px', '400px'],
+                  content: text//iframe的url
+                }); 
+            },'text');
+        });
+        //ajax无刷新搜索  关键字高亮显示
+        $("#search").click(function(){
+            var keyword = $("input[name='keyword']").val();
+            $.get("{:url('admin/order/index')}",{'keyword':keyword},function(json){
+                //替换全局关键字
+                var reg = new RegExp(keyword,'g');
+                if(keyword){
+                    $('tbody').html(json.tbody.replace(reg,"<span style='color:red'>"+keyword+"</span>"));
+                }else{
+                    $('tbody').html(json.tbody);
+                }
+                $(".pagination").html(json.pagelist);
+            },'json');
+        });
+
+        
+
+      $('.tablelist tbody tr:odd').addClass('odd');
+
+        
+    </script>
+</body>
+
+</html>
+

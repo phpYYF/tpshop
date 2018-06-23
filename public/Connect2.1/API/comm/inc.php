@@ -1,0 +1,2 @@
+<?php die('forbidden'); ?>
+{"appid":"1106903745","appkey":"DGq4t6uQAUsNiUkk","callback":"http://www.jx.com/Connect2.1/example/oauth/callback.php","errorReport":true,"storageType":"file","host":"localhost","user":"root","password":"root","database":"test","scope":null}
